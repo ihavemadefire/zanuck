@@ -2,21 +2,22 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("films_cleaned.csv")
+df = pd.read_csv("films_with_budget.csv")
 
 df["primary_genre"] = df["genre"].str.split(",").str[0].str.strip()
 
 df["imdb_rating"] = pd.to_numeric(df["imdb_rating"], errors="coerce")
 df["box_office"] = pd.to_numeric(df["box_office"], errors="coerce")
 df["metascore"] = pd.to_numeric(df["metascore"], errors="coerce")
+df["budget"] = pd.to_numeric(df["budget"], errors="coerce")
 
-df = df.dropna(subset=["imdb_rating","box_office"])
+df = df.dropna(subset=["imdb_rating", "budget"])
 
 plt.figure(figsize=(12,8))
 
 ax = sns.scatterplot(
     data=df,
-    x="box_office",
+    x="budget",
     y="imdb_rating",
     hue="primary_genre",
     size="runtime",
@@ -24,11 +25,19 @@ ax = sns.scatterplot(
     alpha=0.7
 )
 
+sns.regplot(
+    data=df,
+    x="budget",
+    y="imdb_rating",
+    scatter=False,
+    logx=True,
+    color="black",
+    line_kws={"linewidth":2}
+)
+
 # Remove runtime legend entries
 handles, labels = ax.get_legend_handles_labels()
 
-# The first entry is usually the title, the next group is genres,
-# and the runtime entries come after that.
 genre_count = df["primary_genre"].nunique()
 
 ax.legend(
@@ -41,8 +50,8 @@ ax.legend(
 
 plt.xscale("log")
 
-plt.title("Commercial vs Critical Success of Independent Films")
-plt.xlabel("Box Office Revenue (log scale)")
+plt.title("Budget vs Critical Success of Independent Films")
+plt.xlabel("Production Budget (log scale)")
 plt.ylabel("IMDb Rating")
 
 plt.tight_layout()

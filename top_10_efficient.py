@@ -10,6 +10,9 @@ def main():
     df["budget"] = pd.to_numeric(df["budget"], errors="coerce")
     df["box_office"] = pd.to_numeric(df["box_office"], errors="coerce")
 
+    # Keep only the first genre in the list
+    df["genre"] = df["genre"].astype(str).str.split(",").str[0].str.strip()
+
     # Drop unusable rows
     df = df.dropna(subset=["budget", "box_office"]).copy()
     df = df[df["budget"] > 0].copy()
@@ -20,7 +23,7 @@ def main():
     # Sort descending and keep top 10
     top10 = (
         df.sort_values("roi", ascending=False)
-          .loc[:, ["company", "title", "year", "budget", "box_office", "roi"]]
+          .loc[:, ["company", "title", "year", "genre", "budget", "box_office", "roi"]]
           .head(10)
           .reset_index(drop=True)
     )
